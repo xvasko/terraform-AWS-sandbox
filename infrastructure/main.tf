@@ -129,4 +129,63 @@ resource "aws_db_instance" "default" {
   skip_final_snapshot    = true
 }
 
+resource "aws_instance" "app_server" {
+  ami                    = "ami-07620139298af599e"
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.public_subnet.id
+  vpc_security_group_ids = [aws_security_group.web_security_group.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+}
+
+data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
+  arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+data "aws_iam_policy" "AmazonEC2RoleforSSM" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+data "aws_iam_policy" "AmazonSSMFullAccess" {
+  arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+}
+
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_role_allow_session_manager"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_role_policy_attachment_1" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_role_policy_attachment_2" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = data.aws_iam_policy.AmazonEC2RoleforSSM.arn
+}
+resource "aws_iam_role_policy_attachment" "ec2_role_policy_attachment_3" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = data.aws_iam_policy.AmazonSSMFullAccess.arn
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name  = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
+}
+
 

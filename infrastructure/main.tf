@@ -73,4 +73,42 @@ resource "aws_route_table_association" "private_route_table_association_2" {
   route_table_id = aws_route_table.private_route_table.id
 }
 
+resource "aws_security_group" "web_security_group" {
+  name        = "Web security group"
+  description = "Security group for the ec2 instance"
+
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "Allow all HTTP traffic"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound trafic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "db_security_group" {
+  name        = "Datbase security group"
+  description = "Security group for the rds instance"
+
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description     = "Allow posgresql traffic from web server only"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_security_group.id]
+  }
+}
+
 

@@ -111,4 +111,22 @@ resource "aws_security_group" "db_security_group" {
   }
 }
 
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "database_subnet_group"
+  subnet_ids = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
+}
+
+resource "aws_db_instance" "default" {
+  allocated_storage      = 8
+  engine                 = "postgres"
+  engine_version         = "13.4"
+  instance_class         = "db.t3.micro"
+  db_name                = "postgresDatabase"
+  username               = "postgres"
+  password               = "changeme"
+  db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.id
+  vpc_security_group_ids = [aws_security_group.db_security_group.id]
+  skip_final_snapshot    = true
+}
+
 

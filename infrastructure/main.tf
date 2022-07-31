@@ -19,6 +19,10 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 }
 
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = aws_vpc.main.id
+}
+
 resource "aws_subnet" "public_subnet" {
   vpc_id = aws_vpc.main.id
 

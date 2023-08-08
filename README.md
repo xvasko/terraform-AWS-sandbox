@@ -2,8 +2,6 @@
 
 <img width="1068" alt="Screenshot 2022-07-31 at 15 09 44" src="https://user-images.githubusercontent.com/22427765/182011115-6b30472a-0397-439f-b4bb-074adbc69bd4.png">
 
-Accessible at http://54.253.4.8:3000/
-
 ## Repository structure
 
 ``` sh
